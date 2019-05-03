@@ -10,8 +10,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 db.init_app(app)
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 #     user1 = User(netid="sh2429", username="Joyce", description="genius")
 #     user2 = User(netid="xz598", username="Elephant", description="stupid")
 #     # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
