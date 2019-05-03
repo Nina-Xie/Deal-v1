@@ -24,11 +24,17 @@ db.init_app(app)
 
 @app.route('/')
 @app.route('/api/users/')
-#works
 def get_users():
     users = User.query.all()
     res = {'success':True, 'data':[user.serialize() for user in users]}
     return json.dumps(res), 200
+
+@app.route('/api/user/<int:user_id>/')
+def get_user(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    if user is not None:
+        return json.dumps({'success':True, 'data':user.serialize()}), 200
+    return json.dumps({'success':False, 'error':'User not found'}), 404
 
 #expected property name enclosed in the double quote
 @app.route('/api/user/', methods = ['POST'])
@@ -44,32 +50,31 @@ def create_user():
     db.session.commit()
     return json.dumps({'success':True, 'data':user.serialize()}), 201
 
-
 @app.route('/api/posts/')
 def get_posts():
     posts = Post.query.all()
     res = {'success':True, 'data':[post.serialize() for post in posts]}
     return json.dumps(res), 200
 
-@app.route('/api/post/<int:user_id>/', methods = ['POST'])
+@app.route('/api/user/post/<int:user_id>/', methods = ['POST'])
 def create_post(user_id):
     user = User.query.filter_by(id=user_id).first()
     if user is not None:
         post_body = json.loads(request.data)
         post = Post(
             score = 0,
-            itemname = post_body.get('itemname'),
-            itemtype = post_body.get('itemtype'),
-            price = post_body.get('price'),
-            description = post_body.get('description'),
-            item_condition = post_body.get('item_condition'),
-            username = post_body.get('username'),
+            itemname = post_body.get("itemname"),
+            itemtype = post_body.get("itemtype"),
+            price = post_body.get("price"),
+            description = post_body.get("description"),
+            item_condition = post_body.get("item_condition"),
+            username = user.username,
             user_id = user.id
         )
         user.posts.append(post)
         db.session.add(post)
         db.session.commit()
-        return json.dumps({'success':True, 'data':comment.serialize()}), 201
+        return json.dumps({'success':True, 'data':post.serialize()}), 201
     return json.dumps({'success':False, 'error':'User not found'}), 404
 
 @app.route('/api/post/<int:post_id>/')
@@ -120,7 +125,7 @@ def create_comment(post_id, user_id):
             comment = Comment(
                 score = 0,
                 text = post_body.get('text'),
-                username = post_body.get('username'),
+                username = user.username,
                 post_id = post.id
             )
             post.comments.append(comment)

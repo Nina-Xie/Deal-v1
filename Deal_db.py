@@ -60,13 +60,13 @@ class Post(db.Model):
             'price': self.price,
             'description': self.description,
             'item_condition': self.item_condition,
-            'username': self.username
+            'username': self.username,
+            'comments': [a.serialize() for a in self.comments]
         }
 
 class Comment(db.Model):
     __tablename__='comment'
     id = db.Column(db.Integer, primary_key=True)
-    netid = db.Column(db.String, nullable = False)
     score = db.Column(db.Integer, nullable = False)
     text = db.Column(db.String, nullable = False)
     username = db.Column(db.String, nullable = False)
