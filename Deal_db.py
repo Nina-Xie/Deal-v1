@@ -8,6 +8,8 @@ class User(db.Model):
     netid = db.Column(db.String, nullable = False)
     username = db.Column(db.String, nullable = False)
     description = db.Column(db.String, nullable = True)
+    onsale = db.Column(db.PickleType, nullable = False)
+    sold = db.Column(db.PickleType, nullable = False)
     posts = db.relationship('Post', cascade = 'delete')
     comments = db.relationship('Comment', cascade = 'delete')
 
@@ -15,6 +17,8 @@ class User(db.Model):
         self.netid = kwargs.get('netid', '')
         self.username = kwargs.get('username', '')
         self.description = kwargs.get('description', '')
+        self.onsale = []
+        self.sold = []
         self.posts = []
         self.comments = []
 
@@ -24,7 +28,8 @@ class User(db.Model):
             'netid': self.netid,
             'username': self.username,
             'description': self.description,
-            'posts': [a.serialize() for a in self.posts],
+            'onsale': [a.serialize() for a in self.onsale],
+            'sold': [a.serialize() for a in self.sold],
             'comments': [a.serialize() for a in self.comments]
         }
 
@@ -38,6 +43,7 @@ class Post(db.Model):
     description = db.Column(db.String, nullable = False)
     item_condition = db.Column(db.String, nullable = False)
     username = db.Column(db.String, nullable = False)
+    images = db.Column(db.PickleType, nullable = False)
     comments = db.relationship('Comment', cascade ='delete')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
 
@@ -48,6 +54,7 @@ class Post(db.Model):
         self.price = kwargs.get('price', 0.0)
         self.description = kwargs.get('text', 'N/A')
         self.item_condition = kwargs.get('item_condition', 'N/A')
+        self.images = []
         self.username = kwargs.get('username', 'Anonymous user')
         self.user_id = kwargs.get('user.id')
 
@@ -61,6 +68,7 @@ class Post(db.Model):
             'description': self.description,
             'item_condition': self.item_condition,
             'username': self.username,
+            'images' : [a.serialize() for a in self.images],
             'comments': [a.serialize() for a in self.comments]
         }
 
