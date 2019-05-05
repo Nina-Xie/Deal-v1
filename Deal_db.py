@@ -128,7 +128,7 @@ class Comment(db.Model):
 
     def __init__(self, **kwargs):
         self.score = kwargs.get('score', 0)
-        self.text = kwargs.get('text', '')
+        #self.text = kwargs.get('text', '')
         self.message = kwargs.get('message', '')
         self.userName = kwargs.get('userName','')
         self.post_id = kwargs.get('post_id')
@@ -138,7 +138,7 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'score': self.score,
-            'text': self.text,
+            #'text': self.text,
             'message': self.message,
             'userName': self.userName
         }
