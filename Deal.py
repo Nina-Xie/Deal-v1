@@ -12,15 +12,15 @@ app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    # user1 = User(googleID = "hhhhh", netid="sh2429", userName="Joyce", personalInformation="genius", profileImage = '')
-    # user2 = User(googleID = 'xswl', netid="xz598", userName="Elephant", personalInformation="stupid", profileImage = '')
-    # # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
-    # # post2 = Post(itemname="banana", itemtype="food", price=5.0, description="A nice banana", item_condition="like new", username="Xiangyi", user_id=1)
-    # db.session.add(user1)
-    # db.session.add(user2)
-    # # db.session.add(post1)
-    # # db.session.add(post2)
-    # db.session.commit()
+    user1 = User(googleID = "hhhhh", netid="sh2429", userName="Joyce", personalInformation="genius", profileImage = '')
+    user2 = User(googleID = 'xswl', netid="xz598", userName="Elephant", personalInformation="stupid", profileImage = '')
+    # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
+    # post2 = Post(itemname="banana", itemtype="food", price=5.0, description="A nice banana", item_condition="like new", username="Xiangyi", user_id=1)
+    db.session.add(user1)
+    db.session.add(user2)
+    # db.session.add(post1)
+    # db.session.add(post2)
+    db.session.commit()
 
 @app.route('/')
 @app.route('/api/users/')
@@ -141,9 +141,23 @@ def like(user_id, post_id):
     db.session.commit()
     return json.dumps({'success': True, 'data': user.serialize2()}), 200
 
+@app.route('/api/removeFavouritePosts/<string:user_id>/<int:post_id>/', methods=['POST'])
+def dislike(user_id, post_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    if user is None or post is None:
+        return json.dumps({'success': False, 'error': 'Post or User not found'}), 404
+    post.likedUsers.remove(user)
+    user.likedPosts.remove(post)
+    db.session.commit()
+    return json.dumps({'success': True, 'data': user.serialize2()}), 200
+
 @app.route('/api/favouritePosts/<string:user_id>/')
 def get_likedPosts(user_id):
-
+    user = User.query.filter_by(googleID = user_id).first()
+    if user is not None:
+        return json.dumps({'success':True, 'data':[post.serialize() for post in user.likedPosts]}), 200
+    return json.dumps({'success':False, 'error':'User not found'})
 
 @app.route('/api/post/<int:post_id>/', methods = ['DELETE'])
 def delete_post(post_id):
