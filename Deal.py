@@ -12,8 +12,8 @@ app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    # user1 = User(googleID = "hhhhh", netid="sh2429", username="Joyce", description="genius", image = '')
-    # user2 = User(googleID = 'xswl', netid="xz598", username="Elephant", description="stupid", image = '')
+    # user1 = User(googleID = "hhhhh", netid="sh2429", userName="Joyce", personalInformation="genius", profileImage = '')
+    # user2 = User(googleID = 'xswl', netid="xz598", userName="Elephant", personalInformation="stupid", profileImage = '')
     # # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
     # # post2 = Post(itemname="banana", itemtype="food", price=5.0, description="A nice banana", item_condition="like new", username="Xiangyi", user_id=1)
     # db.session.add(user1)
@@ -36,7 +36,6 @@ def get_user(user_id):
         return json.dumps({'success':True, 'data':user.serialize()}), 200
     return json.dumps({'success':False, 'error':'User not found'}), 404
 
-#expected property name enclosed in the double quote
 @app.route('/api/user/', methods = ['POST'])
 def create_user():
     post_body = json.loads(request.data)
@@ -44,9 +43,9 @@ def create_user():
         score = 0,
         googleID = post_body.get('googleID'),
         netid = post_body.get('netid'),
-        username = post_body.get('username'),
-        description = post_body.get('description'),
-        image = post_body.get('image')
+        userName = post_body.get('userName'),
+        personalInformation = post_body.get('personalInformation'),
+        profileImage = post_body.get('profileImage')
     )
     db.session.add(user)
     db.session.commit()
@@ -57,9 +56,9 @@ def update_user(user_id):
     user = User.query.filter_by(googleID = user_id).first()
     if user is not None:
         post_body = json.loads(request.data)
-        user.username = post_body.get('username', user.username)
-        user.description = post_body.get('description', user.description)
-        user.image = post_body.get('image', user.image)
+        user.userName = post_body.get('userName', user.userName)
+        user.personalInformation = post_body.get('personalInformation', user.personalInformation)
+        user.profileImage = post_body.get('profileImage', user.profileImage)
         db.session.commit()
         return json.dumps({'success':True, 'data':user.serialize()}), 200
     return json.dumps({'success':False, 'error':'User not found'}), 404
@@ -77,13 +76,19 @@ def create_post(user_id):
         post_body = json.loads(request.data)
         post = Post(
             score = 0,
-            itemname = post_body.get("itemname"),
+            itemName = post_body.get("itemName"),
             itemtype = post_body.get("itemtype"),
-            price = post_body.get("price"),
-            description = post_body.get("description"),
+            itemPrice = post_body.get("itemPrice"),
+            descriptionText = post_body.get("descriptionText"),
             item_condition = post_body.get("item_condition"),
-            username = user.username,
-            user_id = user.googleID
+            itemImage1 = post_body.get("itemImage1"),
+            itemImage2 = post_body.get("itemImage2"),
+            itemImage3 = post_body.get("itemImage3"),
+            itemImage4 = post_body.get("itemImage4"),
+            itemImage5 = post_body.get("itemImage5"),
+            itemImage6 = post_body.get("itemImage6"),
+            userName = user.userName,
+            userGoogleId = user.googleID
         )
         user.posts.append(post)
         db.session.add(post)
@@ -97,20 +102,44 @@ def get_post(post_id):
     if post is not None:
         return json.dumps({'success':True, 'data':post.serialize()}), 200
     return json.dumps({'success':False, 'error':'Post not found'}), 404
+
+@app.route('/api/posts/<string:user_id>/')
+def get_user_posts(user_id):
+    user = User.query.filter_by(googleID = user_id).first()
+    if user is not None:
+        return json.dumps({'success':True, 'data':[post.serialize() for post in user.posts]}), 200
+    return json.dumps({'success':False, 'error':'User not found'})
         
 @app.route('/api/post/<int:post_id>/', methods = ['POST'])
 def update_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
     if post is not None:
         post_body = json.loads(request.data)
-        post.itemname = post_body.get('itemname', post.itemname)
+        post.itemName = post_body.get('itemName', post.itemName)
         post.itemtype = post_body.get('itemtype', post.itemtype)
-        post.price = post_body.get('price', post.price)
-        post.description = post_body.get('description', post.description)
+        post.itemPrice = post_body.get('itemPrice', post.itemPrice)
+        post.descriptionText = post_body.get('descriptionText', post.descriptionText)
         post.item_condition = post_body.get('item_condition', post.item_condition)
+        post.itemImage1 = post_body.get('itemImage1', post.itemImage1)
+        post.itemImage2 = post_body.get('itemImage2', post.itemImage2)
+        post.itemImage3 = post_body.get('itemImage3', post.itemImage3)
+        post.itemImage4 = post_body.get('itemImage4', post.itemImage4)
+        post.itemImage5 = post_body.get('itemImage5', post.itemImage5)
+        post.itemImage6 = post_body.get('itemImage6', post.itemImage6)
         db.session.commit()
         return json.dumps({'success':True, 'data':post.serialize()}), 200
     return json.dumps({'success':False, 'error':'Post not found'}), 404
+
+@app.route('/api/favouritePosts/<string:user_id>/<int:post_id>/', methods=['POST'])
+def like(user_id, post_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    if user is None or post is None:
+        return json.dumps({'success': False, 'error': 'Post or User not found'}), 404
+    post.likedUsers.append(user)
+    user.likedPosts.append(post)
+    db.session.commit()
+    return json.dumps({'success': True, 'data': user.serialize2()}), 200
 
 @app.route('/api/post/<int:post_id>/', methods = ['DELETE'])
 def delete_post(post_id):
@@ -138,8 +167,8 @@ def create_comment(post_id, user_id):
             post_body = json.loads(request.data)
             comment = Comment(
                 score = 0,
-                text = post_body.get('text'),
-                username = user.username,
+                message = post_body.get('message'),
+                userName = user.userName,
                 post_id = post.id
             )
             post.comments.append(comment)
