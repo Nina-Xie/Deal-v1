@@ -5,31 +5,38 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__='user'
     id = db.Column(db.Integer, primary_key = True)
+    googleID = db.Column(db.String, nullable = False)
     netid = db.Column(db.String, nullable = False)
     username = db.Column(db.String, nullable = False)
     description = db.Column(db.String, nullable = True)
-    onsale = db.Column(db.PickleType, nullable = False)
-    sold = db.Column(db.PickleType, nullable = False)
+    image = db.Column(db.String, nullable = False)
+    # onsale = db.Column(db.PickleType, nullable = False)
+    # sold = db.Column(db.PickleType, nullable = False)
     posts = db.relationship('Post', cascade = 'delete')
     comments = db.relationship('Comment', cascade = 'delete')
 
     def __init__(self, **kwargs):
         self.netid = kwargs.get('netid', '')
+        self.googleID = kwargs.get('googleID', '')
         self.username = kwargs.get('username', '')
         self.description = kwargs.get('description', '')
-        self.onsale = []
-        self.sold = []
+        self.image = kwargs.get('image', '')
+        # self.onsale = []
+        # self.sold = []
         self.posts = []
         self.comments = []
 
     def serialize(self):
         return {
             'id': self.id,
+            'googleID': self.googleID,
             'netid': self.netid,
             'username': self.username,
             'description': self.description,
-            'onsale': [a.serialize() for a in self.onsale],
-            'sold': [a.serialize() for a in self.sold],
+            'image': self.image,
+            # 'onsale': [a.serialize() for a in self.onsale],
+            # 'sold': [a.serialize() for a in self.sold],
+            'posts':[a.serialize() for a in self.posts],
             'comments': [a.serialize() for a in self.comments]
         }
 
@@ -43,24 +50,25 @@ class Post(db.Model):
     description = db.Column(db.String, nullable = False)
     item_condition = db.Column(db.String, nullable = False)
     username = db.Column(db.String, nullable = False)
-    images = db.Column(db.PickleType, nullable = False)
+    # images = db.Column(db.PickleType, nullable = False)
     comments = db.relationship('Comment', cascade ='delete')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_id = db.Column(db.String, db.ForeignKey('user.googleID'), nullable = False)
 
     def __init__(self, **kwargs):
         self.score = kwargs.get('score', 0)
         self.itemname = kwargs.get('itemname','Mysterious item')
         self.itemtype = kwargs.get('itemtype', 'Others')
         self.price = kwargs.get('price', 0.0)
-        self.description = kwargs.get('text', 'N/A')
+        self.description = kwargs.get('description', 'N/A')
         self.item_condition = kwargs.get('item_condition', 'N/A')
-        self.images = []
+        # self.images = []
         self.username = kwargs.get('username', 'Anonymous user')
-        self.user_id = kwargs.get('user.id')
+        self.user_id = kwargs.get('user.googleID', '')
 
     def serialize(self):
         return {
             'id': self.id,
+            'googleID': self.user_id,
             'score': self.score,
             'itemname': self.itemname,
             'itemtype': self.itemtype,
@@ -68,7 +76,7 @@ class Post(db.Model):
             'description': self.description,
             'item_condition': self.item_condition,
             'username': self.username,
-            'images' : [a.serialize() for a in self.images],
+            # 'images' : [a.serialize() for a in self.images],
             'comments': [a.serialize() for a in self.comments]
         }
 

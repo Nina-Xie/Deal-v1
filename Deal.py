@@ -12,8 +12,8 @@ app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    # user1 = User(netid="sh2429", username="Joyce", description="genius")
-    # user2 = User(netid="xz598", username="Elephant", description="stupid")
+    # user1 = User(googleID = "hhhhh", netid="sh2429", username="Joyce", description="genius", image = '')
+    # user2 = User(googleID = 'xswl', netid="xz598", username="Elephant", description="stupid", image = '')
     # # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
     # # post2 = Post(itemname="banana", itemtype="food", price=5.0, description="A nice banana", item_condition="like new", username="Xiangyi", user_id=1)
     # db.session.add(user1)
@@ -29,9 +29,9 @@ def get_users():
     res = {'success':True, 'data':[user.serialize() for user in users]}
     return json.dumps(res), 200
 
-@app.route('/api/user/<int:user_id>/')
+@app.route('/api/user/<string:user_id>/')
 def get_user(user_id):
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(googleID=user_id).first()
     if user is not None:
         return json.dumps({'success':True, 'data':user.serialize()}), 200
     return json.dumps({'success':False, 'error':'User not found'}), 404
@@ -42,13 +42,27 @@ def create_user():
     post_body = json.loads(request.data)
     user = User(
         score = 0,
+        googleID = post_body.get('googleID'),
         netid = post_body.get('netid'),
         username = post_body.get('username'),
-        description = post_body.get('description')
+        description = post_body.get('description'),
+        image = post_body.get('image')
     )
     db.session.add(user)
     db.session.commit()
     return json.dumps({'success':True, 'data':user.serialize()}), 201
+
+@app.route('/api/user/<string:user_id>/', methods = ['POST'])
+def update_user(user_id):
+    user = User.query.filter_by(googleID = user_id).first()
+    if user is not None:
+        post_body = json.loads(request.data)
+        user.username = post_body.get('username', user.username)
+        user.description = post_body.get('description', user.description)
+        user.image = post_body.get('image', user.image)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':user.serialize()}), 200
+    return json.dumps({'success':False, 'error':'User not found'}), 404
 
 @app.route('/api/posts/')
 def get_posts():
@@ -56,9 +70,9 @@ def get_posts():
     res = {'success':True, 'data':[post.serialize() for post in posts]}
     return json.dumps(res), 200
 
-@app.route('/api/user/post/<int:user_id>/', methods = ['POST'])
+@app.route('/api/user/post/<string:user_id>/', methods = ['POST'])
 def create_post(user_id):
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(googleID=user_id).first()
     if user is not None:
         post_body = json.loads(request.data)
         post = Post(
@@ -69,7 +83,7 @@ def create_post(user_id):
             description = post_body.get("description"),
             item_condition = post_body.get("item_condition"),
             username = user.username,
-            user_id = user.id
+            user_id = user.googleID
         )
         user.posts.append(post)
         db.session.add(post)
@@ -115,9 +129,9 @@ def get_comments(post_id):
         return json.dumps({'success':True, 'data':comments}), 200
     return json.dumps({'success':False, 'error':'Post not found'}), 404          
 
-@app.route('/api/post/<int:user_id>/<int:post_id>/comment/', methods = ['POST'])
+@app.route('/api/post/<string:user_id>/<int:post_id>/comment/', methods = ['POST'])
 def create_comment(post_id, user_id):
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(googleID=user_id).first()
     if user is not None:
         post = Post.query.filter_by(id=post_id).first()
         if post is not None:
