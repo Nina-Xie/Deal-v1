@@ -39,6 +39,7 @@ def get_user(user_id):
 @app.route('/api/user/', methods = ['POST'])
 def create_user():
     post_body = json.loads(request.data)
+    googleID = post_body.get('googleID')
     user = User(
         score = 0,
         googleID = post_body.get('googleID'),
