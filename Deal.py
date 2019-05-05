@@ -141,6 +141,10 @@ def like(user_id, post_id):
     db.session.commit()
     return json.dumps({'success': True, 'data': user.serialize2()}), 200
 
+@app.route('/api/favouritePosts/<string:user_id>/')
+def get_likedPosts(user_id):
+
+
 @app.route('/api/post/<int:post_id>/', methods = ['DELETE'])
 def delete_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
