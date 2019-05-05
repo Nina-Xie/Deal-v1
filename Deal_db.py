@@ -1,150 +1,187 @@
-from flask_sqlalchemy import SQLAlchemy
+import json
+from flask import Flask, request
+from Deal_db import db, Post, Comment, User
 
-db = SQLAlchemy()
+app = Flask(__name__)
+db_filename = 'todo.db'
 
-like_association_table = db.Table(
-    'like',
-    db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('post.id')),
-    db.Column('post_id', db.Integer, db.ForeignKey('user.id'))
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = True
 
-class User(db.Model):
-    __tablename__='user'
-    id = db.Column(db.Integer, primary_key = True)
-    googleID = db.Column(db.String, nullable = False)
-    netid = db.Column(db.String, nullable = False)
-    userName = db.Column(db.String, nullable = False)
-    personalInformation = db.Column(db.String, nullable = True)
-    profileImage = db.Column(db.String, nullable = False)
-    posts = db.relationship('Post', cascade = 'delete')
-    comments = db.relationship('Comment', cascade = 'delete')
-    likedPosts = db.relationship('Post', secondary=like_association_table)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+    # user1 = User(googleID = "hhhhh", netid="sh2429", userName="Joyce", personalInformation="genius", profileImage = '')
+    # user2 = User(googleID = 'xswl', netid="xz598", userName="Elephant", personalInformation="stupid", profileImage = '')
+    # # post1 = Post(itemname="1984", itemtype="book", price=100.0, description="A nice book", item_condition="like new", username="Xiangyi", user_id=1)
+    # # post2 = Post(itemname="banana", itemtype="food", price=5.0, description="A nice banana", item_condition="like new", username="Xiangyi", user_id=1)
+    # db.session.add(user1)
+    # db.session.add(user2)
+    # # db.session.add(post1)
+    # # db.session.add(post2)
+    # db.session.commit()
 
-    def __init__(self, **kwargs):
-        self.netid = kwargs.get('netid', '')
-        self.googleID = kwargs.get('googleID', '')
-        self.userName = kwargs.get('userName', '')
-        self.personalInformation = kwargs.get('personalInformation', '')
-        self.profileImage = kwargs.get('profileImage', '')
-        self.posts = []
-        self.comments = []
-        self.likedPosts = []
+@app.route('/')
+@app.route('/api/users/')
+def get_users():
+    users = User.query.all()
+    res = {'success':True, 'data':[user.serialize() for user in users]}
+    return json.dumps(res), 200
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'googleID': self.googleID,
-            'netid': self.netid,
-            'userName': self.userName,
-            'personalInformation': self.personalInformation,
-            'profileImage': self.profileImage,
-            'posts':[a.serialize() for a in self.posts],
-            'comments': [a.serialize() for a in self.comments]
-        }
+@app.route('/api/user/<string:user_id>/')
+def get_user(user_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    if user is not None:
+        return json.dumps({'success':True, 'data':user.serialize()}), 200
+    return json.dumps({'success':False, 'error':'User not found'}), 404
 
-    def serialize2(self):
-        return {
-            'likedPosts': [a.serialize2() for a in self.likedPosts]
-        }
+@app.route('/api/user/', methods = ['POST'])
+def create_user():
+    post_body = json.loads(request.data)
+    user = User(
+        score = 0,
+        googleID = post_body.get('googleID'),
+        netid = post_body.get('netid'),
+        userName = post_body.get('userName'),
+        personalInformation = post_body.get('personalInformation'),
+        profileImage = post_body.get('profileImage')
+    )
+    db.session.add(user)
+    db.session.commit()
+    return json.dumps({'success':True, 'data':user.serialize()}), 201
 
-class Post(db.Model):
-    __tablename__='post'
-    id = db.Column(db.Integer, primary_key = True)
-    score = db.Column(db.Integer, nullable = False)
-    itemName = db.Column(db.String, nullable = False)
-    itemtype = db.Column(db.String, nullable = False)
-    itemPrice = db.Column(db.Float, nullable = False)
-    descriptionText = db.Column(db.String, nullable = False)
-    item_condition = db.Column(db.String, nullable = False)
-    userName = db.Column(db.String, nullable = False)
-    itemImage1 = db.Column(db.String)
-    itemImage2 = db.Column(db.String)
-    itemImage3 = db.Column(db.String)
-    itemImage4 = db.Column(db.String)
-    itemImage5 = db.Column(db.String)
-    itemImage6 = db.Column(db.String)
-    comments = db.relationship('Comment', cascade ='delete')
-    userGoogleId = db.Column(db.String, db.ForeignKey('user.googleID'), nullable = False)
-    likedUsers = db.relationship('User', secondary=like_association_table)
+@app.route('/api/user/<string:user_id>/', methods = ['POST'])
+def update_user(user_id):
+    user = User.query.filter_by(googleID = user_id).first()
+    if user is not None:
+        post_body = json.loads(request.data)
+        user.userName = post_body.get('userName', user.userName)
+        user.personalInformation = post_body.get('personalInformation', user.personalInformation)
+        user.profileImage = post_body.get('profileImage', user.profileImage)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':user.serialize()}), 200
+    return json.dumps({'success':False, 'error':'User not found'}), 404
 
-    def __init__(self, **kwargs):
-        self.score = kwargs.get('score', 0)
-        self.itemName = kwargs.get('itemName','Mysterious item')
-        self.itemtype = kwargs.get('itemtype', 'Others')
-        self.itemPrice = kwargs.get('itemPrice', 0.0)
-        self.descriptionText = kwargs.get('descriptionText', 'N/A')
-        self.item_condition = kwargs.get('item_condition', 'N/A')
-        self.userName = kwargs.get('userName', 'Anonymous user')
-        self.itemImage1 = kwargs.get('image1', '')
-        self.itemImage2 = kwargs.get('image2', '')
-        self.itemImage3 = kwargs.get('image3', '')
-        self.itemImage4 = kwargs.get('image4', '')    
-        self.itemImage5 = kwargs.get('image5', '')  
-        self.itemImage6 = kwargs.get('image6', '')                  
-        self.userGoogleId = kwargs.get('user.googleID', '')
-        self.comments = []
-        self.likedUsers = []
+@app.route('/api/posts/')
+def get_posts():
+    posts = Post.query.all()
+    res = {'success':True, 'data':[post.serialize() for post in posts]}
+    return json.dumps(res), 200
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'googleID': self.userGoogleId,
-            'score': self.score,
-            'itemName': self.itemName,
-            'itemtype': self.itemtype,
-            'itemPrice': self.itemPrice,
-            'descriptionText': self.descriptionText,
-            'item_condition': self.item_condition,
-            'userName': self.userName,
-            'image1': self.itemImage1,
-            'image2': self.itemImage2,
-            'image3': self.itemImage3,
-            'image4': self.itemImage4,
-            'image5': self.itemImage5,
-            'image6': self.itemImage6,
-            'comments': [a.serialize() for a in self.comments]
-        }
+@app.route('/api/user/post/<string:user_id>/', methods = ['POST'])
+def create_post(user_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    if user is not None:
+        post_body = json.loads(request.data)
+        post = Post(
+            score = 0,
+            itemName = post_body.get("itemName"),
+            itemtype = post_body.get("itemtype"),
+            itemPrice = post_body.get("itemPrice"),
+            descriptionText = post_body.get("descriptionText"),
+            item_condition = post_body.get("item_condition"),
+            itemImage1 = post_body.get("itemImage1"),
+            itemImage2 = post_body.get("itemImage2"),
+            itemImage3 = post_body.get("itemImage3"),
+            itemImage4 = post_body.get("itemImage4"),
+            itemImage5 = post_body.get("itemImage5"),
+            itemImage6 = post_body.get("itemImage6"),
+            userName = user.userName,
+            userGoogleId = user.googleID
+        )
+        user.posts.append(post)
+        db.session.add(post)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':post.serialize()}), 201
+    return json.dumps({'success':False, 'error':'User not found'}), 404
 
-    def serialize2(self):
-        return{
-            'id':self.id
-        }
+@app.route('/api/post/<int:post_id>/')
+def get_post(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is not None:
+        return json.dumps({'success':True, 'data':post.serialize()}), 200
+    return json.dumps({'success':False, 'error':'Post not found'}), 404
 
-class Comment(db.Model):
-    __tablename__='comment'
-    id = db.Column(db.Integer, primary_key = True)
-    score = db.Column(db.Integer, nullable = False)
-    message = db.Column(db.String, nullable = False)
-    userName = db.Column(db.String, nullable = False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+@app.route('/api/posts/<string:user_id>/')
+def get_user_posts(user_id):
+    user = User.query.filter_by(googleID = user_id).first()
+    if user is not None:
+        return json.dumps({'success':True, 'data':[post.serialize() for post in user.posts]}), 200
+    return json.dumps({'success':False, 'error':'User not found'})
+        
+@app.route('/api/post/<int:post_id>/', methods = ['POST'])
+def update_post(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is not None:
+        post_body = json.loads(request.data)
+        post.itemName = post_body.get('itemName', post.itemName)
+        post.itemtype = post_body.get('itemtype', post.itemtype)
+        post.itemPrice = post_body.get('itemPrice', post.itemPrice)
+        post.descriptionText = post_body.get('descriptionText', post.descriptionText)
+        post.item_condition = post_body.get('item_condition', post.item_condition)
+        post.itemImage1 = post_body.get('itemImage1', post.itemImage1)
+        post.itemImage2 = post_body.get('itemImage2', post.itemImage2)
+        post.itemImage3 = post_body.get('itemImage3', post.itemImage3)
+        post.itemImage4 = post_body.get('itemImage4', post.itemImage4)
+        post.itemImage5 = post_body.get('itemImage5', post.itemImage5)
+        post.itemImage6 = post_body.get('itemImage6', post.itemImage6)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':post.serialize()}), 200
+    return json.dumps({'success':False, 'error':'Post not found'}), 404
 
-    def __init__(self, **kwargs):
-        self.score = kwargs.get('score', 0)
-        self.message = kwargs.get('message', '')
-        self.userName = kwargs.get('userName','')
-        self.post_id = kwargs.get('post_id')
-        self.user_id = kwargs.get('user_id')
+@app.route('/api/favouritePosts/<string:user_id>/<int:post_id>/', methods=['POST'])
+def like(user_id, post_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    if user is None or post is None:
+        return json.dumps({'success': False, 'error': 'Post or User not found'}), 404
+    post.likedUsers.append(user)
+    user.likedPosts.append(post)
+    db.session.commit()
+    return json.dumps({'success': True, 'data': user.serialize2()}), 200
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'score': self.score,
-            'message': self.message,
-            'userName': self.username
-        }
+@app.route('/api/favouritePosts/<string:user_id>/')
+def get_likedPosts(user_id):
 
-# class Image(db.Model):
-#     __tablename__='image'
-#     id = db.Column(db.Integer, primary_key = True)
-#     source = db.Column(db.String, nullable = False)
 
-#     def __init__(self. **kwargs):
-#         self.source = kwargs.get('source','')
+@app.route('/api/post/<int:post_id>/', methods = ['DELETE'])
+def delete_post(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is not None:
+        db.session.delete(post)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':post.serialize()}), 200
+    return json.dumps({'success':False, 'error':'Post not found'}), 404
 
-#     def serialize(self):
-#         return {
-#             'id': self.id,
-#             'source': self.source
-#         }
+@app.route('/api/post/<int:post_id>/comments/')
+def get_comments(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is not None:
+        comments = [comment.serialize() for comment in post.comments]
+        return json.dumps({'success':True, 'data':comments}), 200
+    return json.dumps({'success':False, 'error':'Post not found'}), 404          
+
+@app.route('/api/post/<string:user_id>/<int:post_id>/comment/', methods = ['POST'])
+def create_comment(post_id, user_id):
+    user = User.query.filter_by(googleID=user_id).first()
+    if user is not None:
+        post = Post.query.filter_by(id=post_id).first()
+        if post is not None:
+            post_body = json.loads(request.data)
+            comment = Comment(
+                score = 0,
+                message = post_body.get('message'),
+                userName = user.userName,
+                post_id = post.id
+            )
+            post.comments.append(comment)
+            user.comments.append(comment)
+            db.session.add(comment)
+            db.session.commit()
+            return json.dumps({'success':True, 'data':comment.serialize()}), 201
+        return json.dumps({'success':False, 'error':'Post not found'}), 404
+    return json.dumps({'success':False, 'error':'User not found'}), 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
