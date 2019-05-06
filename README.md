@@ -49,9 +49,9 @@ UIImagePickerController - integrated for the user to upload item images and prof
 &#10141; [Deal Spec](https://paper.dropbox.com/doc/Deal-Spec--AcljVfAX9t6dh07~Kl4dfoswAg-aiS3qX6kGyQ0M5LaVBitn)
 
 ## Authors:
-&#10141; [Yichen Feng] (https://github.com/AgnesYichenFeng)</p>
-&#10141; [Nina Xie] (https://github.com/Nina-Xie)</p>
-&#10141; [Joyce Huang] (https://github.com/JoyceHuangEC)</p>
-&#10141; [Xiangyi Zhao] (https://github.com/JoyceHuangEC)</p>
+<p>&#10141; [Yichen Feng] (https://github.com/AgnesYichenFeng)</p>
+<p>&#10141; [Nina Xie] (https://github.com/Nina-Xie)</p>
+<p>&#10141; [Joyce Huang] (https://github.com/JoyceHuangEC)</p>
+<p>&#10141; [Xiangyi Zhao] (https://github.com/JoyceHuangEC)</p>
 
 ©2019 by Fx&Hz
