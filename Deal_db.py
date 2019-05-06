@@ -60,7 +60,6 @@ class Post(db.Model):
     itemPrice = db.Column(db.Float, nullable = False)
     descriptionText = db.Column(db.String, nullable = False)
     item_condition = db.Column(db.String)
-    # images = db.Column(db.PickleType, nullable = False)
     userName = db.Column(db.String, nullable = False)
     itemImage1 = db.Column(db.String)
     itemImage2 = db.Column(db.String)
@@ -81,12 +80,12 @@ class Post(db.Model):
         self.item_condition = kwargs.get('item_condition', 'N/A')
         # self.images = []
         self.userName = kwargs.get('userName', 'Anonymous user')
-        self.itemImage1 = kwargs.get('image1', '')
-        self.itemImage2 = kwargs.get('image2', '')
-        self.itemImage3 = kwargs.get('image3', '')
-        self.itemImage4 = kwargs.get('image4', '')    
-        self.itemImage5 = kwargs.get('image5', '')  
-        self.itemImage6 = kwargs.get('image6', '')                  
+        self.itemImage1 = kwargs.get('itemImage1', '')
+        self.itemImage2 = kwargs.get('itemImage2', '')
+        self.itemImage3 = kwargs.get('itemImage3', '')
+        self.itemImage4 = kwargs.get('itemImage4', '')    
+        self.itemImage5 = kwargs.get('itemImage5', '')  
+        self.itemImage6 = kwargs.get('itemImage6', '')                  
         self.userGoogleId = kwargs.get('user.googleID', '')
         self.comments = []
         self.likedUsers = []
@@ -103,12 +102,12 @@ class Post(db.Model):
             'item_condition': self.item_condition,
             # 'images' : [a.serialize() for a in self.images],
             'userName': self.userName,
-            'image1': self.itemImage1,
-            'image2': self.itemImage2,
-            'image3': self.itemImage3,
-            'image4': self.itemImage4,
-            'image5': self.itemImage5,
-            'image6': self.itemImage6,
+            'itemImage1': self.itemImage1,
+            'itemImage2': self.itemImage2,
+            'itemImage3': self.itemImage3,
+            'itemImage4': self.itemImage4,
+            'itemImage5': self.itemImage5,
+            'itemImage6': self.itemImage6,
             'comments': [a.serialize() for a in self.comments]
         }
 
@@ -128,7 +127,6 @@ class Comment(db.Model):
 
     def __init__(self, **kwargs):
         self.score = kwargs.get('score', 0)
-        #self.text = kwargs.get('text', '')
         self.message = kwargs.get('message', '')
         self.userName = kwargs.get('userName','')
         self.post_id = kwargs.get('post_id')
@@ -138,21 +136,6 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'score': self.score,
-            #'text': self.text,
             'message': self.message,
             'userName': self.userName
         }
-
-# class Image(db.Model):
-#     __tablename__='image'
-#     id = db.Column(db.Integer, primary_key = True)
-#     source = db.Column(db.String, nullable = False)
-
-#     def __init__(self. **kwargs):
-#         self.source = kwargs.get('source','')
-
-#     def serialize(self):
-#         return {
-#             'id': self.id,
-#             'source': self.source
-#         }
