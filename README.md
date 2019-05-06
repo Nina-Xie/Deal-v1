@@ -16,23 +16,16 @@ Back on the item's detail view, through the tool bar on the bottom, one can add 
 
 <p>Deal does not yet accomplish all of our envisioned features such as sending system notifications to users and message chatting between buyers and sellers. We would love to further work on Deal to actually bring it to our campus in the future.
 
-<img src = " " width = "207" height = "447.5">
 
 ### Login Process
-< img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/GID%20Sign%20In.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/GID%20SignIn2.png" width = "207" height = "447.5">
+< img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/GID%20Sign%20In.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/GID%20SignIn2.png" width = "207" height = "447.5">
 
 ### User Profile Page (Favorites and OnSale)
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Editing%20Profile%20Page.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/User%20Profile.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/My%20Favorite%20(User%20Profile).png" width = "207" height = "447.5">
+<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Editing%20Profile%20Page.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/User%20Profile.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/My%20Favorite%20(User%20Profile).png" width = "207" height = "447.5">
 
 ### Home Screen: Items Display, Search Bar
 ### Detail Screen: Item Info, Seller Page/Like/Comment
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Home%20Screen.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Search%20Bar.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Item%20Detail%20Info.png" width = "207" height = "447.5">
-<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Comments.png" width = "207" height = "447.5">
+<img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Home%20Screen.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Search%20Bar.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Item%20Detail%20Info.png" width = "207" height = "447.5"><img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Comments.png" width = "207" height = "447.5">
 
 ### Post Screen: Post New Item
 <img src = "https://github.com/Nina-Xie/Deal-v1/blob/master/Post%20New%20Item.png" width = "207" height = "447.5">
