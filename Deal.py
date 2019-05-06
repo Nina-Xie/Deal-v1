@@ -36,21 +36,23 @@ def get_user(user_id):
         return json.dumps({'success':True, 'data':user.serialize()}), 200
     return json.dumps({'success':False, 'error':'User not found'}), 404
 
-@app.route('/api/user/', methods = ['POST'])
-def create_user():
+@app.route('/api/user/<string:user_id>/', methods = ['POST'])
+def create_user(user_id):
     post_body = json.loads(request.data)
-    googleID = post_body.get('googleID')
-    user = User(
-        score = 0,
-        googleID = post_body.get('googleID'),
-        netid = post_body.get('netid'),
-        userName = post_body.get('userName'),
-        personalInformation = post_body.get('personalInformation'),
-        profileImage = post_body.get('profileImage')
-    )
-    db.session.add(user)
-    db.session.commit()
-    return json.dumps({'success':True, 'data':user.serialize()}), 201
+    user = User.query.filter_by(googleID=user_id).first()
+    if user is None:
+        user = User(
+            score = 0,
+            googleID = post_body.get('googleID'),
+            netid = post_body.get('netid'),
+            userName = post_body.get('userName'),
+            personalInformation = post_body.get('personalInformation'),
+            profileImage = post_body.get('profileImage')
+        )
+        db.session.add(user)
+        db.session.commit()
+        return json.dumps({'success':True, 'data':user.serialize()}), 201
+    return json.dumps({'success':True, 'data':'User has already existed'}), 200
 
 @app.route('/api/user/<string:user_id>/', methods = ['POST'])
 def update_user(user_id):
